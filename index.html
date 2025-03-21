@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Files to Google Drive</title>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            text-align: center;
+            width: 300px;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        #drop-area {
+            border: 2px dashed #007bff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 10px;
+            transition: background-color 0.3s;
+        }
+        #drop-area.hover {
+            background-color: #e9ecef;
+        }
+        #upload-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #upload-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Upload Files to Google Drive</h1>
+        <div id="drop-area">Drag & Drop files here or click to select</div>
+        <input type="file" id="file-input" style="display: none;" />
+        <button id="upload-button">Upload</button>
+    </div>
+
+    <script>
+        let CLIENT_ID = 'YOUR_CLIENT_ID'; // Replace with your Client ID
+        let API_KEY = 'YOUR_API_KEY'; // Replace with your API Key
+        let SCOPES = 'https://www.googleapis.com/auth/drive.file';
+
+        function handleClientLoad() {
+            gapi.load('client:auth2', initClient);
+        }
+
+        function initClient() {
+            gapi.client.init({
+                apiKey: API_KEY,
+                clientId: CLIENT_ID,
+                scope: SCOPES,
+                discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
+            }).then(() => {
+                document.getElementById('upload-button').onclick = uploadFile;
+                const dropArea = document.getElementById('drop-area');
+
+                dropArea.addEventListener('click', () => document.getElementById('file-input').click());
+                dropArea.addEventListener('dragover', (event) => {
+                    event.preventDefault();
+                    dropArea.classList.add('hover');
+                });
+                dropArea.addEventListener('dragleave', () => dropArea.classList.remove('hover'));
+                dropArea.addEventListener('drop', (event) => {
+                    event.preventDefault();
+                    dropArea.classList.remove('hover');
+                    const files = event.dataTransfer.files;
+                    if (files.length > 0) {
+                        document.getElementById('file-input').files = files;
+                    }
+                });
+            });
+        }
+
+        function uploadFile() {
+            const fileInput = document.getElementById('file-input');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert('Please select a file!');
+                return;
+            }
+
+            const metadata = {
+                name: file.name,
+                mimeType: file.type,
+                parents: ['YOUR_FOLDER_ID'] // Replace with your folder ID
+            };
+
+            const accessToken = gapi.auth.getToken().access_token;
+            const form = new FormData();
+            form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+            form.append('file', file);
+
+            fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+                method: 'POST',
+                headers: new Headers({ 'Authorization': 'Bearer ' + accessToken }),
+                body: form
+            }).then((response) => response.json()).then((data) => {
+                console.log('File uploaded:', data);
+                alert('File uploaded successfully!');
+            }).catch((error) => {
+                console.error('Error:', error);
+                alert('An error occurred while uploading the file.');
+            });
+        }
+
+        window.onload = handleClientLoad;
+    </script>
+</body>
+</html>
