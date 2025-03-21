@@ -59,8 +59,8 @@
     </div>
 
     <script>
-        let CLIENT_ID = 'YOUR_CLIENT_ID'; // Replace with your Client ID
-        let API_KEY = 'YOUR_API_KEY'; // Replace with your API Key
+        let CLIENT_ID = '290128795265-6ikqj265e06la695qdirtpfjbdjs7s9g.apps.googleusercontent.com'; // Client ID
+        let API_KEY = 'AIzaSyBEPL5jReA0ASTC-_7K9svJviy6Kv0nBJo'; // Thay thế bằng API Key của bạn
         let SCOPES = 'https://www.googleapis.com/auth/drive.file';
 
         function handleClientLoad() {
@@ -106,7 +106,8 @@
             const metadata = {
                 name: file.name,
                 mimeType: file.type,
-                parents: ['YOUR_FOLDER_ID'] // Replace with your folder ID
+                parents: ['13vPkx6wmFRUXXNVvlPwqAvcr_VKaR_qP
+'] // Thay thế bằng Folder ID của bạn
             };
 
             const accessToken = gapi.auth.getToken().access_token;
